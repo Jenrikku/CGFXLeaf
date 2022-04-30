@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace CGFXLeaf {
+namespace CGFXLeaf.Dictionaries {
     public class CGFXDictionary : Dictionary<string, CGFXDictEntry> {
         public ushort HeaderUnk0;
         public byte[] HeaderUnk1 = new byte[10];
@@ -10,6 +10,8 @@ namespace CGFXLeaf {
 
     public class CGFXDictEntry {
         public ulong Unk;
+
+        public dynamic Content;
     }
 
     public enum CGFXDictDataType : byte {
