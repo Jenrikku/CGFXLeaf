@@ -9,6 +9,12 @@ namespace CGFXLeaf {
         public ByteOrder ByteOrder;
         public uint Version;
 
+        /// <summary>
+        /// All the data is stored in this dictionary.
+        /// Usage: RootDictionary[<see cref="CGFXDictDataType"/>]
+        /// </summary>
+        public Dictionary<CGFXDictDataType, CGFXDictionary> RootDictionary = new();
+
         public CGFX(byte[] data) : this(new MemoryStream(data)) { }
         
         public CGFX(string filename) : this(new FileStream(filename, FileMode.Open)) { }
@@ -31,6 +37,7 @@ namespace CGFXLeaf {
             uint entryCount = reader.ReadUInt32();
 
             // The DATA section is an array of DICT (dictionaries).
+            // Each dictionary has its own data type. (Models, Textures, etc)
             if(reader.ReadString(4) != "DATA") // Magic check.
                 throw new InvalidDataException("The DATA setion is corrupted or missplaced.");
 
@@ -46,24 +53,23 @@ namespace CGFXLeaf {
                 }
             }
 
-            List<CGFXDictionary> root = new();
             using(reader.TemporarySeek()) {
-                foreach((uint, uint) hash in hashes) {
-                    CGFXDictionary dict = new();
+                for(byte i = 0; i <= 15; i++) {
+                    CGFXDictionary dict = new() { DataType = (CGFXDictDataType) i };
 
-                    reader.Position = hash.Item2;
+                    reader.Position = hashes[i].Item2;
                     if(reader.ReadString(4) != "DICT")
                         throw new InvalidDataException($"Failed to read dictionary at position {reader.Position - 4}.");
 
                     uint dictLength = reader.ReadUInt32();
 
-                    Debug.Assert(hash.Item1 == reader.ReadUInt32());
+                    Debug.Assert(hashes[i].Item1 == reader.ReadUInt32());
                     Debug.Assert(reader.ReadInt32() == -1);
 
                     dict.HeaderUnk0 = reader.ReadUInt16();
                     reader.Read(dict.HeaderUnk1, 0, 10);
 
-                    for(uint i = 1; i <= hash.Item1; i++) {
+                    for(uint j = 1; j <= hashes[i].Item1; j++) {
                         ulong unk = reader.ReadUInt64();
 
                         using(reader.TemporarySeek()) {
