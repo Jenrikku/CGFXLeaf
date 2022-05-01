@@ -52,6 +52,8 @@ namespace CGFXLeaf.Dictionaries {
                     value = CGFXData.ReadData(reader, dataType);
                 }
 
+                reader.Position += 4;
+
                 CGFXDictEntry entry = new() { Unk = unk, Content = value };
 
                 dict.Add(key, entry);
