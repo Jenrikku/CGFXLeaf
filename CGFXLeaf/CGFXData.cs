@@ -37,7 +37,7 @@ namespace CGFXLeaf.Data {
         internal static CMDL Read(BinaryDataReader reader) {
             CMDL cmdl = new();
 
-            cmdl.Flags = reader.ReadBooleans(32);
+            cmdl.Flags = reader.ReadBits(4);
             Debug.Assert(reader.ReadString(4) == "CMDL"); // Magic check
             cmdl.Unk0 = reader.ReadUInt32();
 
