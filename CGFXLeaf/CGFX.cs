@@ -57,50 +57,15 @@ namespace CGFXLeaf {
                 }
             }
 
+            // Reads all dictionary entries.
             for(byte i = 0; i <= 15; i++) {
-                if(hashes.Count < i) {
+                if(hashes.Count <= i) {
                     Debug.Assert(false);
                     return;
                 }
 
-                CGFXDictionary dict = new() { DataType = (CGFXDictDataType) i };
-
-                reader.Position = hashes[i].Item2;
-                if(reader.ReadString(4) != "DICT")
-                    throw new InvalidDataException($"Failed to read dictionary at position {reader.Position - 4}.");
-
-                reader.Position += 4; // Skip dictionary's length (it is calculated when writing).
-                //uint dictLength = reader.ReadUInt32();
-
-                Debug.Assert(hashes[i].Item1 == reader.ReadUInt32());
-                Debug.Assert(reader.ReadInt32() == -1);
-
-                dict.HeaderUnk0 = reader.ReadUInt16();
-                reader.Read(dict.HeaderUnk1, 0, 10);
-
-                for(uint j = 1; j <= hashes[i].Item1; j++) {
-                    ulong unk = reader.ReadUInt64();
-
-                    string key;
-                    using(reader.TemporarySeek()) {
-                        reader.Position += reader.ReadUInt32();
-                        key = reader.ReadString(BinaryStringFormat.ZeroTerminated);
-                    }
-
-                    reader.Position += 4;
-
-                    dynamic value;
-                    using(reader.TemporarySeek()) {
-                        reader.Position += reader.ReadUInt32();
-                        value = CGFXData.ReadData(reader, (CGFXDictDataType) i);
-                    }
-
-                    CGFXDictEntry entry = new() { Unk = unk, Content = value };
-
-                    dict.Add(key, entry);
-                }
-
-                RootDictionary.Add((CGFXDictDataType) i, dict);
+                RootDictionary.Add((CGFXDictDataType) i, 
+                    CGFXDictionary.Read(reader, (CGFXDictDataType) i, hashes[i].Item1, hashes[i].Item2));
             }
         }
     }
