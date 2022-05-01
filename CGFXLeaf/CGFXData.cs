@@ -10,6 +10,9 @@ namespace CGFXLeaf.Data {
             switch(dataType) {
                 case CGFXDictDataType.Models:
                     return CMDL.Read(reader);
+                case CGFXDictDataType.Unknown:
+                case CGFXDictDataType.Other:
+                    return "Unknown / Other offset: " + reader.Position;
                 default:
                     return null;
             }
@@ -47,15 +50,14 @@ namespace CGFXLeaf.Data {
             reader.Read(cmdl.Unk1, 0, 0x18);
 
             uint animCount = reader.ReadUInt32();
-            using(reader.TemporarySeek()) { // Read anim dictionary
-                reader.Position += reader.ReadUInt32();
-                if(reader.ReadString(4) != "DICT")
-                    throw new InvalidDataException($"CMDL: Failed to read dictionary at position {reader.Position - 4}.");
-
-                reader.Position += 4; // Skip dictionary's length (it is calculated when writing).
-                //uint dictLength = reader.ReadUInt32();
-
-                // TO-DO: Read dictionary.
+            using(reader.TemporarySeek()) {
+                // Read anim dictionary
+                CGFXDictionary.Read(
+                    reader,
+                    CGFXDictDataType.Other,
+                    animCount,
+                    (uint) reader.Position + reader.ReadUInt32(),
+                    "CMDL");
             }
             reader.Position += 4;
 
