@@ -52,7 +52,9 @@ namespace CGFXLeaf {
             using(reader.TemporarySeek()) {
                 uint entryCount = reader.ReadUInt32();
                 while(entryCount != 1413695812) { // Reading up until DICT
-                    hashes.Add((entryCount, (uint) reader.Position + reader.ReadUInt32()));
+                    uint offset = reader.ReadUInt32();
+                    hashes.Add(
+                        (entryCount, offset != 0 ? (uint) (reader.Position - 4) + offset : 0));
                     entryCount = reader.ReadUInt32();
                 }
             }
@@ -63,6 +65,9 @@ namespace CGFXLeaf {
                     Debug.Assert(false);
                     return;
                 }
+
+                if(hashes[i].Offset == 0)
+                    return;
 
                 RootDictionary.Add((CGFXDictDataType) i, 
                     CGFXDictionary.Read(reader, (CGFXDictDataType) i, hashes[i].EntryCount, hashes[i].Offset));
