@@ -48,7 +48,7 @@ namespace CGFXLeaf {
             //uint dataLength = reader.ReadUInt32();
 
             // CGFX's hashes are formed by the number of entries on a dictionary and its relative offset. 
-            List<(uint, uint)> hashes = new();
+            List<(uint EntryCount, uint Offset)> hashes = new();
             using(reader.TemporarySeek()) {
                 uint entryCount = reader.ReadUInt32();
                 while(entryCount != 1413695812) { // Reading up until DICT
@@ -65,7 +65,7 @@ namespace CGFXLeaf {
                 }
 
                 RootDictionary.Add((CGFXDictDataType) i, 
-                    CGFXDictionary.Read(reader, (CGFXDictDataType) i, hashes[i].Item1, hashes[i].Item2));
+                    CGFXDictionary.Read(reader, (CGFXDictDataType) i, hashes[i].EntryCount, hashes[i].Offset));
             }
         }
     }
