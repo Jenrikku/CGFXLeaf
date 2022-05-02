@@ -108,11 +108,11 @@ namespace ModelViewer {
                 camTarget.Y -= 10;
             }
 
-            if(Keyboard.GetState().IsKeyDown(Keys.OemPlus))
-                camPosition.Z += 10;
+            if(Keyboard.GetState().IsKeyDown(Keys.LeftShift))
+                camPosition.Z -= 25;
 
-            if(Keyboard.GetState().IsKeyDown(Keys.OemMinus))
-                camPosition.Z -= 10;
+            if(Keyboard.GetState().IsKeyDown(Keys.Tab))
+                camPosition.Z += 25;
 
             if(Keyboard.GetState().IsKeyDown(Keys.Space)) {
                 if(!isSpacePressed)
