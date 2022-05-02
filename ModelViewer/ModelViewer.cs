@@ -22,10 +22,12 @@ namespace ModelViewer {
 
         // Orbit
         bool isOrbit = false;
+        bool isSpacePressed = false;
 
         // Back face culling
         RasterizerState rasterizerState = new() {
             CullMode = CullMode.CullCounterClockwiseFace };
+        bool isKeyFPressed;
 
         public ModelViewer() {
             _graphics = new GraphicsDeviceManager(this);
@@ -38,7 +40,7 @@ namespace ModelViewer {
 
             // Setup Camera
             camTarget = Vector3.Zero;
-            camPosition = new Vector3(0, 0, -100);
+            camPosition = new Vector3(0, 0, -1000);
 
             projectionMatrix = Matrix.CreatePerspectiveFieldOfView(
                 MathHelper.ToRadians(70),
@@ -112,8 +114,13 @@ namespace ModelViewer {
             if(Keyboard.GetState().IsKeyDown(Keys.OemMinus))
                 camPosition.Z -= 10;
 
-            if(Keyboard.GetState().IsKeyDown(Keys.Space))
-                isOrbit = !isOrbit;
+            if(Keyboard.GetState().IsKeyDown(Keys.Space)) {
+                if(!isSpacePressed)
+                    isOrbit = !isOrbit;
+                
+                isSpacePressed = true;
+            } else
+                isSpacePressed = false;
 
             if(isOrbit)
                 camPosition = Vector3.Transform(
@@ -123,16 +130,19 @@ namespace ModelViewer {
             viewMatrix = Matrix.CreateLookAt(camPosition, camTarget, Vector3.Up);
 
             if(Keyboard.GetState().IsKeyDown(Keys.F)) {
-                RasterizerState newRasterizerState = new();
+                if(!isKeyFPressed) {
+                    RasterizerState newRasterizerState = new();
 
-                if(GraphicsDevice.RasterizerState.CullMode == CullMode.CullCounterClockwiseFace)
-                    newRasterizerState.CullMode = CullMode.None;
-                else newRasterizerState.CullMode = GraphicsDevice.RasterizerState.CullMode + 1;
+                    if(GraphicsDevice.RasterizerState.CullMode == CullMode.CullCounterClockwiseFace)
+                        newRasterizerState.CullMode = CullMode.None;
+                    else newRasterizerState.CullMode = GraphicsDevice.RasterizerState.CullMode + 1;
 
-                GraphicsDevice.RasterizerState = newRasterizerState;
+                    GraphicsDevice.RasterizerState = newRasterizerState;
+                }
 
-                //while(!Keyboard.GetState().IsKeyUp(Keys.F)) ;
-            }
+                isKeyFPressed = true;
+            } else
+                isKeyFPressed = false;
 
             base.Update(gameTime);
         }
