@@ -4,7 +4,7 @@ namespace ModelViewer {
     public static class Program {
         [STAThread]
         static void Main() {
-            using(var game = new GameController())
+            using(var game = new ModelViewer())
                 game.Run();
         }
     }
