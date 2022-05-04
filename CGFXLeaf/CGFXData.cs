@@ -1,7 +1,6 @@
 ﻿using CGFXLeaf.Dictionaries;
 using Syroot.BinaryData;
 using System.Diagnostics;
-using System.IO;
 using System.Numerics;
 
 namespace CGFXLeaf.Data {
@@ -30,9 +29,14 @@ namespace CGFXLeaf.Data {
         public byte[] Unk1 = new byte[0x18];
         public CGFXDictionary Animations;
         public Vector3 GlobalScale;
-        public byte[] Unk2 = new byte[0x18];
-        public Matrix4x4 Matrix1;
-        public Matrix4x4 Matrix2;
+        public Vector3 GlobalRotation;
+        public Vector3 GlobalTranlation;
+        public Matrix4x4 WorldMatrix;
+        public Matrix4x4 LocalMatrix;
+        public CGFXDictionary Dict1;
+        public CGFXDictionary Dict2;
+        public CGFXDictionary Dict3;
+        public CGFXDictionary Dict4;
 
         internal static CMDL Read(BinaryDataReader reader) {
             CMDL cmdl = new();
@@ -52,7 +56,7 @@ namespace CGFXLeaf.Data {
             uint animCount = reader.ReadUInt32();
             using(reader.TemporarySeek()) {
                 // Read anim dictionary
-                CGFXDictionary.Read(
+                cmdl.Animations = CGFXDictionary.Read(
                     reader,
                     CGFXDictDataType.Other,
                     animCount,
@@ -62,22 +66,51 @@ namespace CGFXLeaf.Data {
             reader.Position += 4;
 
             cmdl.GlobalScale = new(reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle());
-
-            reader.Read(cmdl.Unk2, 0, 0x18);
+            cmdl.GlobalRotation = new(reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle());
+            cmdl.GlobalTranlation = new(reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle());
 
             // Matrices
-            cmdl.Matrix1 = new(
+            cmdl.WorldMatrix = new(
                 reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle(),
                 reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle(),
                 reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle(),
-                0, 0, 0, 0);
-            cmdl.Matrix2 = new(
+                -1, -1, -1, -1);
+            cmdl.LocalMatrix = new(
                 reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle(),
                 reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle(),
                 reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle(),
-                0, 0, 0, 0);
+                -1, -1, -1, -1);
 
             // TO-DO: Read dictionaries.
+            // NOTE: They do not seem to be working correctly.
+
+            using(reader.TemporarySeek())
+                cmdl.Dict1 = CGFXDictionary.Read(
+                    reader,
+                    CGFXDictDataType.Other,
+                    reader.ReadUInt32(),
+                    (uint) reader.Position + reader.ReadUInt32(),
+                    "CGFX");
+
+            reader.Position += 8;
+
+            using(reader.TemporarySeek())
+                cmdl.Dict2 = CGFXDictionary.Read(
+                    reader,
+                    CGFXDictDataType.Other,
+                    reader.ReadUInt32(),
+                    (uint) reader.Position + reader.ReadUInt32(),
+                    "CGFX");
+
+            reader.Position += 8;
+
+            using(reader.TemporarySeek())
+                cmdl.Dict3 = CGFXDictionary.Read(
+                    reader,
+                    CGFXDictDataType.Other,
+                    reader.ReadUInt32(),
+                    (uint) reader.Position + reader.ReadUInt32(),
+                    "CGFX");
 
             return cmdl;
         }
