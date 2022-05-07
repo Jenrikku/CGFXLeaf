@@ -49,13 +49,13 @@ namespace CGFXLeaf {
             // Reads dictionary entries:
             for(byte i = 0; i <= 15; i++) {
                 uint entryCount = reader.ReadUInt32();
-                uint offset = reader.ReadUInt32();
+                uint offset = reader.ReadRelativeOffset();
 
                 if(offset == 0)
                     return;
 
                 RootDictionary.Add((CGFXDictDataType) i,
-                    CGFXDictionary.Read(reader, (CGFXDictDataType) i, entryCount, (uint) (reader.Position - 4) + offset));
+                    CGFXDictionary.Read(reader, (CGFXDictDataType) i, entryCount, offset));
             }
         }
     }
