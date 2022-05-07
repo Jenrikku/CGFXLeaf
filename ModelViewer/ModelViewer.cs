@@ -59,7 +59,7 @@ namespace ModelViewer {
 
                 Projection = projectionMatrix,
                 World = worldMatrix
-        };
+            };
 
             // Create triangle
             triangleVertices = new VertexPositionColor[3] {
