@@ -1,5 +1,4 @@
-﻿using CGFXLeaf.Data;
-using CGFXLeaf.Dictionaries;
+﻿using CGFXLeaf.Dictionaries;
 using Syroot.BinaryData;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -47,18 +46,16 @@ namespace CGFXLeaf {
             reader.Position += 4; // Skip DATA section's length (it is calculated when writing).
             //uint dataLength = reader.ReadUInt32();
 
-            using(reader.TemporarySeek()) {
-                for (byte i = 0; i <= 15; i++)
-                {
-                    uint entryCount = reader.ReadUInt32();
-                    uint offset = reader.ReadUInt32();
+            // Reads dictionary entries:
+            for(byte i = 0; i <= 15; i++) {
+                uint entryCount = reader.ReadUInt32();
+                uint offset = reader.ReadUInt32();
 
-                    if (offset == 0)
-                        return;
+                if(offset == 0)
+                    return;
 
-                    RootDictionary.Add((CGFXDictDataType)i,
-                        CGFXDictionary.Read(reader, (CGFXDictDataType)i, entryCount, (uint)(reader.Position - 4) + offset));
-                }
+                RootDictionary.Add((CGFXDictDataType) i,
+                    CGFXDictionary.Read(reader, (CGFXDictDataType) i, entryCount, (uint) (reader.Position - 4) + offset));
             }
         }
     }
