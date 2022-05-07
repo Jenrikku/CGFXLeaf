@@ -1,5 +1,6 @@
 ﻿using CGFXLeaf.Dictionaries;
 using Syroot.BinaryData;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Numerics;
 
@@ -33,8 +34,8 @@ namespace CGFXLeaf.Data {
         public Vector3 GlobalTranlation;
         public Matrix4x4 WorldMatrix;
         public Matrix4x4 LocalMatrix;
-        public CGFXDictionary Dict1;
-        public CGFXDictionary Dict2;
+        public Dictionary<string, SOBJ> Meshes = new();
+        public CGFXDictionary MaterialsDict;
         public CGFXDictionary Dict3;
         public CGFXDictionary Dict4;
 
@@ -88,12 +89,22 @@ namespace CGFXLeaf.Data {
                 uint meshCount = reader.ReadUInt32();
                 reader.MoveToRelativeOffset();
 
-                uint[] meshOffsets = reader.ReadRelativeOffsets((int) meshCount);
+                for(int i = 1; i <= meshCount; i++) {
+                    using(reader.TemporarySeek()) {
+                        reader.MoveToRelativeOffset();
+                        SOBJ obj = SOBJ.Read(reader);
+
+                        cmdl.Meshes.Add(obj.Name, obj);
+                    }
+                }
+
+                //uint[] meshOffsets = reader.ReadRelativeOffsets((int) meshCount);
+                //foreach(uint meshOffset in meshOffsets) ;
             }
             reader.Position += 8;
 
             using(reader.TemporarySeek())
-                cmdl.Dict2 = CGFXDictionary.Read(
+                cmdl.MaterialsDict = CGFXDictionary.Read(
                     reader,
                     CGFXDictDataType.Other,
                     reader.ReadUInt32(),
@@ -111,6 +122,31 @@ namespace CGFXLeaf.Data {
                     "CGFX");
 
             return cmdl;
+        }
+    }
+
+    /// <summary>
+    /// Stores mesh and skeleton data.
+    /// </summary>
+    public class SOBJ {
+        // The objects are declared in the same order they appear in the file.
+        public uint Unk0;
+        public uint Unk1;
+        public string Name;
+        
+        internal static SOBJ Read(BinaryDataReader reader) {
+            SOBJ obj = new();
+
+            obj.Unk0 = reader.ReadUInt32();
+            Debug.Assert(reader.ReadString(4) == "SOBJ"); // Magic check
+            obj.Unk1 = reader.ReadUInt32();
+
+            using(reader.TemporarySeek()) {
+                reader.MoveToRelativeOffset();
+                obj.Name = reader.ReadString(BinaryStringFormat.ZeroTerminated);
+            }
+
+            return obj;
         }
     }
 }
