@@ -40,7 +40,7 @@ namespace CGFXLeaf.Dictionaries {
 
                 string key;
                 using(reader.TemporarySeek()) {
-                    reader.Position += reader.ReadUInt32();
+                    reader.MoveToRelativeOffset();
                     key = reader.ReadString(BinaryStringFormat.ZeroTerminated);
                 }
 
@@ -48,7 +48,7 @@ namespace CGFXLeaf.Dictionaries {
 
                 dynamic value;
                 using(reader.TemporarySeek()) {
-                    reader.Position += reader.ReadUInt32();
+                    reader.MoveToRelativeOffset();
                     value = CGFXData.ReadData(reader, dataType);
                 }
 

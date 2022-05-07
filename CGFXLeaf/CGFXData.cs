@@ -46,7 +46,7 @@ namespace CGFXLeaf.Data {
             cmdl.Unk0 = reader.ReadUInt32();
 
             using(reader.TemporarySeek()) { // ModelName
-                reader.Position += reader.ReadUInt32();
+                reader.MoveToRelativeOffset();
                 cmdl.ModelName = reader.ReadString(BinaryStringFormat.ZeroTerminated);
             }
             reader.Position += 4;
@@ -60,14 +60,14 @@ namespace CGFXLeaf.Data {
                     reader,
                     CGFXDictDataType.Other,
                     animCount,
-                    (uint) reader.Position + reader.ReadUInt32(),
+                    reader.ReadRelativeOffset(),
                     "CMDL");
             }
             reader.Position += 4;
 
-            cmdl.GlobalScale = new(reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle());
-            cmdl.GlobalRotation = new(reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle());
-            cmdl.GlobalTranlation = new(reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle());
+            cmdl.GlobalScale = reader.ReadVector3();
+            cmdl.GlobalRotation = reader.ReadVector3();
+            cmdl.GlobalTranlation = reader.ReadVector3();
 
             // Matrices
             cmdl.WorldMatrix = new(
@@ -84,14 +84,12 @@ namespace CGFXLeaf.Data {
             // TO-DO: Read dictionaries.
             // NOTE: They do not seem to be working correctly.
 
-            using(reader.TemporarySeek())
-                cmdl.Dict1 = CGFXDictionary.Read(
-                    reader,
-                    CGFXDictDataType.Other,
-                    reader.ReadUInt32(),
-                    (uint) reader.Position + reader.ReadUInt32(),
-                    "CGFX");
+            using(reader.TemporarySeek()) { // Meshes' offsets
+                uint meshCount = reader.ReadUInt32();
+                reader.MoveToRelativeOffset();
 
+                uint[] meshOffsets = reader.ReadRelativeOffsets((int) meshCount);
+            }
             reader.Position += 8;
 
             using(reader.TemporarySeek())
@@ -99,7 +97,7 @@ namespace CGFXLeaf.Data {
                     reader,
                     CGFXDictDataType.Other,
                     reader.ReadUInt32(),
-                    (uint) reader.Position + reader.ReadUInt32(),
+                    reader.ReadRelativeOffset(),
                     "CGFX");
 
             reader.Position += 8;
@@ -109,7 +107,7 @@ namespace CGFXLeaf.Data {
                     reader,
                     CGFXDictDataType.Other,
                     reader.ReadUInt32(),
-                    (uint) reader.Position + reader.ReadUInt32(),
+                    reader.ReadRelativeOffset(),
                     "CGFX");
 
             return cmdl;
